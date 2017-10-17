@@ -1,6 +1,18 @@
 import React, { Component } from 'react';
+import * as BooksAPI from './BooksAPI.js';
 
 class WantToReadBooks extends Component{
+  state = {
+    value: 'wantToRead'
+  }
+
+  updateQuery(book, event) {
+      BooksAPI.update(book, this.state.value).then((books) => {
+        console.log(this.state.value);
+        console.log(book);
+        this.setState({ books })
+      })
+  }
   render() {
     return (
         <div>
@@ -16,7 +28,7 @@ class WantToReadBooks extends Component{
                       <div className="book-cover" style={{ width: 128, height: 193,
                         backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
                       <div className="book-shelf-changer">
-                        <select>
+                        <select value={this.state.value} onChange={(event) => this.updateQuery(book,event.target.value)} >
                           <option value="none" disabled>Move to...</option>
                           <option value="currentlyReading">Currently Reading</option>
                           <option value="wantToRead">Want to Read</option>

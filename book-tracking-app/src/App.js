@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 import escapeRegExp from 'escape-string-regexp'
 import sortBy from 'sort-by'
 
+import Shelf from './Shelf.js'
 import BookSearch from './BookSearch.js'
 import * as BooksAPI from './BooksAPI.js'
 import './App.css';
@@ -20,17 +21,17 @@ class App extends Component {
     rvalue: 'read'
   }
 
-  updateQuery(book, shelf) {
+  updateQuery = (book, shelf) =>{
       let toShelf, fromShelf
       fromShelf = book.shelf
       toShelf = shelf
       console.log(fromShelf);
       console.log(toShelf);
-      BooksAPI.update(book, shelf).then(() => {
-        this.setState({
-          toShelf: this.state[toShelf].push(book),
-          [fromShelf]: this.state[fromShelf].filter((b) => b.id !== book.id)
-        })
+      BooksAPI.update(book, shelf).then(res => {
+        this.setState(state => ({
+          toShelf: state[toShelf].push(book),
+          [fromShelf]: state[fromShelf].filter((b) => b.id !== book.id)
+        }))
       })
   }
 
@@ -56,7 +57,6 @@ class App extends Component {
 
 
     return (
-
       <div>
 
       <Route exact path="/" render={() => (
@@ -66,105 +66,9 @@ class App extends Component {
           </div>
           <div>
               <div className="list-books-content">
-
-                <div>
-                    <div>
-                      <div className="bookshelf">
-                        <h2 className="bookshelf-title">Currently Reading</h2>
-                        <div className="bookshelf-books">
-                          <ul className='books-grid'>
-                            {this.state.currentlyReading.map((book) => (
-                              <li key={book.id}>
-                                <div className="book">
-                                  <div className="book-top">
-
-                                  <div className="book-cover" style={{ width: 128, height: 193,
-                                    backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
-                                  <div className="book-shelf-changer">
-                                    <select value={this.state.crvalue} onChange={(event) => this.updateQuery(book,event.target.value)}>
-                                      <option value="none">Move to...</option>
-                                      <option value="currentlyReading">Currently Reading</option>
-                                      <option value="wantToRead">Want to Read</option>
-                                      <option value="read">Read</option>
-                                      <option value="none">None</option>
-                                    </select>
-                                  </div>
-                                </div>
-                                  <p className="book-title">{book.title}</p>
-                                  <p className="book-authors">{book.authors}</p>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div>
-                      <div className="bookshelf">
-                        <h2 className="bookshelf-title">Want to read</h2>
-                        <div className="bookshelf-books">
-                          <ul className='books-grid'>
-                            {this.state.wantToRead.map((book) => (
-                              <li key={book.id}>
-                                <div className="book">
-                                  <div className="book-top">
-
-                                  <div className="book-cover" style={{ width: 128, height: 193,
-                                    backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
-                                  <div className="book-shelf-changer">
-                                    <select value={this.state.wrvalue} onChange={(event) => this.updateQuery(book,event.target.value)} >
-                                      <option value="none" disabled>Move to...</option>
-                                      <option value="currentlyReading">Currently Reading</option>
-                                      <option value="wantToRead">Want to Read</option>
-                                      <option value="read">Read</option>
-                                      <option value="none">None</option>
-                                    </select>
-                                  </div>
-                                </div>
-                                  <p className="book-title">{book.title}</p>
-                                  <p className="book-authors">{book.authors}</p>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                </div>
-                <div>
-                  <div className="bookshelf">
-                    <h2 className="bookshelf-title">Read</h2>
-                    <div className="bookshelf-books">
-                      <ul className='books-grid'>
-                        {this.state.read.map((book) => (
-                          <li key={book.id}>
-                            <div className="book">
-                              <div className="book-top">
-
-                              <div className="book-cover" style={{ width: 128, height: 193,
-                                backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
-                              <div className="book-shelf-changer">
-                                <select value={this.state.rvalue} onChange={(event) => this.updateQuery(book,event.target.value)}>
-                                  <option value="none">Move to...</option>
-                                  <option value="currentlyReading">Currently Reading</option>
-                                  <option value="wantToRead">Want to Read</option>
-                                  <option value="read">Read</option>
-                                  <option value="none">None</option>
-                                </select>
-                              </div>
-                            </div>
-                              <p className="book-title">{book.title}</p>
-                              <p className="book-authors">{book.authors}</p>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                <Shelf shelfTitle="Currently Reading" books={this.state.currentlyReading} updateShelf={this.updateQuery}></Shelf>
+                <Shelf shelfTitle="Want to read" books={this.state.wantToRead} updateShelf={this.updateQuery}></Shelf>
+                <Shelf shelfTitle="Read" books={this.state.read} updateShelf={this.updateQuery}></Shelf>
               </div>
           </div>
           <div className="open-search">
@@ -172,7 +76,7 @@ class App extends Component {
           </div>
         </div>
       )}/>
-      <Route path="/search" render = {({ history }) => (
+      <Route path="/search" render ={({ history }) => (
         <BookSearch></BookSearch>
       )}/>
 

@@ -1,23 +1,17 @@
 import React, { Component } from 'react';
-import * as BooksAPI from './BooksAPI.js';
+import PropTypes from 'prop-types'
 
-class CurrentlyReadingBooks extends Component {
-  state = {
-    value: 'currentlyReading'
+class Shelf extends Component {
+  static propTypes = {
+    books: PropTypes.array.isRequired,
+    updateShelf: PropTypes.func.isRequired
   }
-  updateQuery(book, event) {
-      BooksAPI.update(book, this.state.value).then((books) => {
-        console.log(this.state.value);
-        console.log(books);
-        this.setState({ books })
-      })
-  }
+
   render() {
-    console.log('Props', this.props);
     return(
       <div>
         <div className="bookshelf">
-          <h2 className="bookshelf-title">Currently Reading</h2>
+          <h2 className="bookshelf-title">{this.props.shelfTitle}</h2>
           <div className="bookshelf-books">
             <ul className='books-grid'>
               {this.props.books.map((book) => (
@@ -28,7 +22,7 @@ class CurrentlyReadingBooks extends Component {
                     <div className="book-cover" style={{ width: 128, height: 193,
                       backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
                     <div className="book-shelf-changer">
-                      <select value={this.state.value} onChange={(event) => this.updateQuery(event.target.value)}>
+                      <select value={book.shelf} onChange={(event) => this.props.updateShelf(book,event.target.value)}>
                         <option value="none">Move to...</option>
                         <option value="currentlyReading">Currently Reading</option>
                         <option value="wantToRead">Want to Read</option>
@@ -50,4 +44,4 @@ class CurrentlyReadingBooks extends Component {
   }
 }
 
-export default CurrentlyReadingBooks;
+export default Shelf;
