@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
-
 import { Route, Link } from 'react-router-dom';
-import PropTypes from 'prop-types'
-import escapeRegExp from 'escape-string-regexp'
-import sortBy from 'sort-by'
-
 import Shelf from './Shelf.js'
 import BookSearch from './BookSearch.js'
 import * as BooksAPI from './BooksAPI.js'
@@ -21,7 +16,7 @@ class App extends Component {
     rvalue: 'read'
   }
 
-  updateQuery = (book, shelf) =>{
+  updateQuery = (book, shelf) => {
       let toShelf, fromShelf
       fromShelf = book.shelf
       toShelf = shelf
@@ -37,7 +32,6 @@ class App extends Component {
 
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
-      console.log(books);
       this.setState({ books: books })
       this.setState({
         currentlyReading: books.filter(book => book.shelf === "currentlyReading"),
@@ -50,10 +44,6 @@ class App extends Component {
 
 
   render() {
-    const {books} = this.props
-    const {query} = this.state
-    let bookList
-    let currentlyreading, wanttoread, read
 
 
     return (
@@ -76,8 +66,8 @@ class App extends Component {
           </div>
         </div>
       )}/>
-      <Route path="/search" render ={({ history }) => (
-        <BookSearch></BookSearch>
+      <Route path="/search" render={() => (
+        <BookSearch updateShelf={this.updateQuery}></BookSearch>
       )}/>
 
     </div>
