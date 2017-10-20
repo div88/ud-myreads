@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types'
-
+import { Link } from 'react-router-dom';
 
 import * as BooksAPI from './BooksAPI.js'
 import './App.css';
@@ -27,11 +27,26 @@ search = (query) => {
         if(books.error === "empty query") {
           console.log("No search results")
         } else {
-          this.setState({ books })
+        let mybooks = this.props.booksG
+        for(var i =0; i< books.length; i++){
+          var sbook = books[i];
+          var mybook = mybooks.filter(book => book.id === sbook.id);
+          console.log(mybook)
+        if(mybook.length === 1){
+          books[i].shelf = mybook[0].shelf
+        }
+        else{
+          books[i].shelf = "none"
+        }
+        }
+        this.setState({
+          books: books
+        })
         }
       }
     })
   }
+
 }
 
 
@@ -39,7 +54,7 @@ search = (query) => {
     return (
       <div className="search-books">
         <div className="search-books-bar">
-          <a className="close-search">Close</a>
+          <Link to="/"className="close-search">Close</Link>
           <div className="search-books-input-wrapper">
             <input
             type="text"
@@ -63,7 +78,7 @@ search = (query) => {
 
                   <div className="book-shelf-changer">
                     <select value={book.shelf} onChange={(event) => this.props.updateShelf(book,event.target.value)}>
-                      <option value="none">Move to...</option>
+                      <option value="">Move to...</option>
                       <option value="currentlyReading">Currently Reading</option>
                       <option value="wantToRead">Want to Read</option>
                       <option value="read">Read</option>

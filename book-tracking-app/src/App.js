@@ -8,9 +8,11 @@ import './App.css';
 class App extends Component {
   state = {
     books: [],
+    booksG: [],
     currentlyReading: [],
     wantToRead: [],
     read: [],
+    none: [],
     crvalue: 'currentlyReading',
     wrvalue: 'wantToRead',
     rvalue: 'read'
@@ -33,6 +35,7 @@ class App extends Component {
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
       this.setState({ books: books })
+      this.setState({ booksG: books })
       this.setState({
         currentlyReading: books.filter(book => book.shelf === "currentlyReading"),
         wantToRead: books.filter(book => book.shelf === "wantToRead"),
@@ -67,7 +70,7 @@ class App extends Component {
         </div>
       )}/>
       <Route path="/search" render={() => (
-        <BookSearch updateShelf={this.updateQuery}></BookSearch>
+        <BookSearch booksG={this.state.booksG} updateShelf={this.updateQuery}></BookSearch>
       )}/>
 
     </div>
