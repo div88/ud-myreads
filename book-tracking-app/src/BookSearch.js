@@ -1,101 +1,76 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom';
-
+import { Route, Link } from 'react-router-dom';
+import Shelf from './Shelf.js'
+import BookSearch from './BookSearch.js'
 import * as BooksAPI from './BooksAPI.js'
 import './App.css';
 
-class BookSearch extends Component {
-
-  static propTypes = {
-    updateShelf: PropTypes.func.isRequired
-  }
+class App extends Component {
 state = {
-  query: '',
-  books: []
+  books: [],
+  currentlyReading: [],
+  wantToRead: [],
+  read: [],
+  none: [],
+  crvalue: 'currentlyReading',
+  wrvalue: 'wantToRead',
+  rvalue: 'read'
 }
 
-clearQuery = () => {
-  this.setState({ query: '' })
+updateQuery = (book, shelf) => {
+let toShelf, fromShelf
+fromShelf = book.shelf
+toShelf = shelf
+BooksAPI.update(book, shelf).then(res => {
+  book.shelf = toShelf
+  this.setState(state => ({
+    toShelf: state[toShelf].push(book),
+    [fromShelf]: state[fromShelf].filter((b) => b.id !== book.id)
+  }))
+})
 }
 
-search = (query) => {
-  this.setState({ query: query.trim() })
-  if(this.state.query) {
-    BooksAPI.search(query,20).then((books) => {
-      if(typeof books !== 'undefined'){
-        if(books.error === "empty query") {
-          console.log("No search results")
-        } else {
-        let mybooks = this.props.booksG
-        for(var i =0; i< books.length; i++){
-          var sbook = books[i];
-          var mybook = mybooks.filter(book => book.id === sbook.id);
-          console.log(mybook)
-        if(mybook.length === 1){
-          books[i].shelf = mybook[0].shelf
-        }
-        else{
-          books[i].shelf = "none"
-        }
-        }
-        this.setState({
-          books: books
-        })
-        }
-      }
-    })
-  }
-
+componentDidMount() {
+BooksAPI.getAll().then((books) => {
+  this.setState({ books: books })
+  this.setState({ booksG: books })
+  this.setState({
+    currentlyReading: books.filter(book => book.shelf === "currentlyReading"),
+    wantToRead: books.filter(book => book.shelf === "wantToRead"),
+    read: books.filter(book => book.shelf === "read")
+  })
+})
 }
 
 
-  render() {
-    return (
-      <div className="search-books">
-        <div className="search-books-bar">
-          <Link to="/"className="close-search">Close</Link>
-          <div className="search-books-input-wrapper">
-            <input
-            type="text"
-            placeholder="Search by title or author"
-            value={this.state.query}
-            onChange={(event) => this.search(event.target.value)}/>
-          </div>
+
+render() {
+return (
+  <div>
+    <Route exact path="/" render={() => (
+      <div className="list-books">
+        <div className="list-books-title">
+          <h2>My Reads</h2>
         </div>
-        <div className="search-books-results">
-
-          <ul className='books-grid'>
-            {this.state.books.map((book) => (
-              <li key={book.id}>
-                <div className="book">
-                  <div className="book-top">
-                    <div className="book-cover" style={{
-                      width: 128,
-                      height: 193,
-                      backgroundImage: typeof book.imageLinks !== "undefined" && typeof book.imageLinks.thumbnail !== 'undefined' ? `url(${book.imageLinks.thumbnail})` : `none` }}>
-                    </div>
-
-                  <div className="book-shelf-changer">
-                    <select value={book.shelf} onChange={(event) => this.props.updateShelf(book,event.target.value)}>
-                      <option value="">Move to...</option>
-                      <option value="currentlyReading">Currently Reading</option>
-                      <option value="wantToRead">Want to Read</option>
-                      <option value="read">Read</option>
-                      <option value="none">None</option>
-                    </select>
-                  </div>
-                </div>
-                  <p className="book-title">{book.title}</p>
-                  <p className="book-authors">{book.authors}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+        <div>
+        <div className="list-books-content">
+        <Shelf shelfTitle="Currently Reading" books={this.state.currentlyReading} updateShelf={this.updateQuery}></Shelf>
+        <Shelf shelfTitle="Want to read" books={this.state.wantToRead} updateShelf={this.updateQuery}></Shelf>
+        <Shelf shelfTitle="Read" books={this.state.read} updateShelf={this.updateQuery}></Shelf>
+        </div>
+        </div>
+        <div className="open-search">
+        <Link to="/search" onClick={() => this.setState({ showSearchPage: true })}>Add a book</Link>
         </div>
       </div>
-  )
-  }
+    )}/>
+    <Route path="/search" render={() => (
+      <BookSearch booksG={this.state.booksG} updateShelf={this.updateQuery}></BookSearch>
+    )}/>
+
+  </div>
+  );
+}
 }
 
-export default BookSearch;
+export default App;
